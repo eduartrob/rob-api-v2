@@ -1,0 +1,38 @@
+name: Deploy to EC2 on develop branch
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Define el directorio de la aplicación
+            APP_DIR="/home/${{ secrets.EC2_USER }}/rob-api"
+
+            # Navega al directorio. Si no existe, clona el repositorio. Si existe, actualízalo.
+            if [ -d "$APP_DIR" ]; then
+              cd $APP_DIR
+              echo ">>> Actualizando el repositorio..."
+              git pull origin develop
+            else
+              echo ">>> Clonando el repositorio por primera vez..."
+              git clone -b develop https://github.com/eduartrob/rob-api.git $APP_DIR
+              cd $APP_DIR
+            fi
+
+            echo ">>> Deteniendo servicios y construyendo la nueva imagen..."
+            # El comando 'up' con la bandera '--build' reconstruirá la imagen 'api'
+            # porque su código fuente ha cambiado, y luego levantará los servicios.
+            docker compose up -d --build

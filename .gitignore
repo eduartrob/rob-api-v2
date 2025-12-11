@@ -1,0 +1,11 @@
+# .gitignore
+dist
+node_modules
+.env
+dist
+
+src/config/serviceAccountKey.json
+
+logs
+*.log
+ 
