@@ -33,7 +33,7 @@ export class S3Controller {
     const signedIconUrl = appFileDoc.iconKey ? await generatePresignedUrl(appFileDoc.iconKey) : null;
     const signedAppFileUrl = appFileDoc.appFileKey ? await generatePresignedUrl(appFileDoc.appFileKey) : null;
 
-    const screenshots = appFileDoc.screenshots as Screenshot[];
+    const screenshots = (appFileDoc.screenshots as unknown) as Screenshot[];
     const signedScreenshotUrls = await Promise.all(
       screenshots.map(async (screenshot: Screenshot) => {
         return screenshot.key ? await generatePresignedUrl(screenshot.key) : null;
@@ -62,8 +62,8 @@ export class S3Controller {
     const savedFile = await prisma.userFile.create({
       data: {
         userId: userId,
-        key: result.Key,
-        url: result.Location,
+        key: result.Key || '',
+        url: result.Location || '',
         contentType: file.mimetype,
       }
     });
@@ -164,7 +164,7 @@ export class S3Controller {
     }
 
     // --- Screenshots Logic ---
-    const currentScreenshotsInDb = appFileDoc.screenshots as Screenshot[];
+    const currentScreenshotsInDb = (appFileDoc.screenshots as unknown) as Screenshot[];
     const cleanedScreenshotsToKeepUrls = screenshotsToKeepUrls.map(url => cleanUrl(url));
     console.log("Cleaned screenshots to keep from client:", cleanedScreenshotsToKeepUrls);
 
@@ -228,7 +228,7 @@ export class S3Controller {
         appFileUrl,
         appFileKey,
         appFileSize,
-        screenshots: finalScreenshotsForDb,
+        screenshots: finalScreenshotsForDb as any,
         uploadedAt: new Date(),
       }
     });
@@ -277,7 +277,7 @@ export class S3Controller {
 
     // 3. Delete files from S3
     const keysToDelete: string[] = [];
-    const screenshots = appFileDoc.screenshots as Screenshot[];
+    const screenshots = (appFileDoc.screenshots as unknown) as Screenshot[];
 
     if (appFileDoc.iconKey) { keysToDelete.push(appFileDoc.iconKey); }
     if (appFileDoc.appFileKey) { keysToDelete.push(appFileDoc.appFileKey); }
