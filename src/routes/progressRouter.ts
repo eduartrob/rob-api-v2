@@ -12,7 +12,7 @@ const progressController = new ProgressController();
  */
 progressRouter.post("/toggle", authMiddleware, async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = (req as any).userId;
+        const userId = (req as any).user?.userId;
         const { habitId, date } = req.body;
 
         if (!habitId) {
@@ -40,7 +40,7 @@ progressRouter.post("/toggle", authMiddleware, async (req: Request, res: Respons
  */
 progressRouter.get("/completions", authMiddleware, async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = (req as any).userId;
+        const userId = (req as any).user?.userId;
         const { date } = req.query;
 
         const completionDate = date ? new Date(date as string) : new Date();
@@ -63,7 +63,7 @@ progressRouter.get("/completions", authMiddleware, async (req: Request, res: Res
  */
 progressRouter.get("/stats", authMiddleware, async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = (req as any).userId;
+        const userId = (req as any).user?.userId;
         const { period } = req.query;
 
         const validPeriod = ["week", "month", "year"].includes(period as string)
